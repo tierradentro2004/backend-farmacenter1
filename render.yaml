@@ -1,0 +1,42 @@
+# render.yaml
+services:
+  # ------ BACKEND (Express + MongoDB) ------
+  - type: web
+    name: farmacenter-backend
+    env: node
+    branch: main
+    buildCommand: |
+      cd backend-mongodb
+      npm install
+    startCommand: |
+      cd backend-mongodb
+      npm run start
+    envVars:
+      - key: PORT
+        value: "5000"
+      - key: MONGODB_URI
+        # marca sync: false si prefieres pegarlas en el Dashboard de Render
+        sync: false
+      - key: EMAIL_USER
+        sync: false
+      - key: EMAIL_APP_PASS
+        sync: false
+      - key: FRONTEND_URL
+        # aquí pon la URL pública de tu frontend en Render/Vercel
+        value: "https://farmacenter-frontend.onrender.com"
+    healthCheckPath: /api/health
+
+  # ------ FRONTEND (Vite + React) ------
+  - type: static
+    name: farmacenter-frontend
+    branch: main
+    buildCommand: |
+      cd frontend-auth
+      npm install
+      npm run build
+    staticPublishPath: frontend-auth/dist
+    envVars:
+      # Render inyecta estas vars durante el build de Vite
+      - key: VITE_API_BASE_URL
+        # apunta al URL público de tu backend
+        value: "https://farmacenter-backend.onrender.com"
